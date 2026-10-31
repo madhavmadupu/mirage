@@ -1,0 +1,66 @@
+# M.I.R.A.G.E. — Consolidated Technical Reference (`llms-full.txt`)
+
+## 1. System Identity & Purpose
+- **Repository**: `https://github.com/madhavmadupu/mirage`
+- **Full Name**: Multimodal Intelligent Rendering & Automated Generation Engine (M.I.R.A.G.E.)
+- **Author**: Madhav Madupu (Applied AI Engineer — Autonomous Systems & AI Infrastructure, `madhav.madupu@gmail.com`)
+- **Hardware Envelope**: NVIDIA RTX 4060 (8 GB GDDR6 VRAM, 3072 CUDA Cores, 24 RT Cores, 96 Tensor Cores)
+- **Primary Objective**: Eliminate the robotic perception training data bottleneck by procedurally generating physically based synthetic datasets with synchronized RGB, Float32 metric depth, camera-space surface normals, 16-bit instance segmentation masks, 2D modal/amodal bounding boxes, and 6-DoF object poses.
+
+## 2. Five-Stage Pipeline Architecture
+1. **Declarative Scene Graph & Domain Randomization Spec**:
+   - Configured via YAML/JSON (`DomainRandomizationSpec`).
+   - Uses Stratified Latin Hypercube Sampling (LHS) keyed by a 64-bit integer seed (`master_seed`) to sample continuous parameters: camera spherical coordinates $(\rho, \theta, \phi)$, focal length jitter, HDRI rotation and log-exposure, PBR metallic/roughness/base-color distributions, and clutter object counts.
+2. **Headless Rendering Engine**:
+   - Runs Blender 4.2 LTS as an embedded Python module (`import bpy`) inside isolated worker processes.
+   - Executes 120 steps (2.0 s at 60 Hz) of Bullet rigid-body physics (`bpy.ops.ptcache.bake`) so dropped target and distractor meshes settle into non-interpenetrating, physically plausible poses.
+   - Supports two GPU backends on RTX 4060:
+     - `eevee_next`: Rasterized PBR with screen-space raytracing for high-throughput generation (>= 10 FPS at 640x640).
+     - `cycles_optix`: Hardware-accelerated raytracing via NVIDIA OptiX RT cores with OptiX AI Denoiser (>= 4 FPS at 640x640, >= 1.6 FPS at 1280x720).
+3. **Multi-Modal Ground-Truth Compositor Pass**:
+   - Programmatically constructs a Blender Compositor node tree (`scene.use_nodes = True`) connected to `CompositorNodeRLayers`.
+   - Simultaneously outputs:
+     - `rgb`: 8-bit or 16-bit sRGB PNG.
+     - `depth`: 32-bit float OpenEXR metric Z-depth in meters.
+     - `normals`: 16-bit float OpenEXR camera-space unit normal vectors.
+     - `instance_mask`: 16-bit unsigned integer PNG encoding per-object `pass_index` ($1 \dots 65535$).
+     - `poses`: Exact 6-DoF transformation matrices $\mathbf{T}_{C}^{O_k} \in SE(3)$ serialized in JSON.
+4. **Deterministic Annotation & Quality Assurance Gate**:
+   - Projects 3D oriented bounding box corners via $\mathbf{p}_{\text{uv}} = \mathbf{K} [\mathbf{R} \mid \mathbf{t}] \tilde{\mathbf{P}}_{\text{world}}$ using the exact basis change $\mathbf{C}_{B\to C} = \text{diag}(1, -1, -1)$ from Blender camera coordinates to OpenCV optical coordinates.
+   - Extracts tight modal 2D bounding boxes directly from the 16-bit instance segmentation buffer.
+   - Computes visibility ratio $V_k = A_{\text{modal}}^{(k)} / A_{\text{amodal, in-frame}}^{(k)}$ and truncation ratio $T_k$.
+   - Rejects frames with `NaN`/`Inf` depth values, non-unit foreground normals, or degenerate bounding boxes ($< 4\text{ px}$).
+   - Writes a cryptographic `manifest.json` containing SHA-256 digests of every modality file and the canonicalized scene spec.
+5. **Multi-Format Dataset Exporter**:
+   - **Ultralytics YOLO11**: Writes normalized `class_id x_center y_center width height` labels (plus optional instance polygon contours) and `data.yaml` for direct ingestion by R.A.P.T.O.R. Tier 1 detector training.
+   - **COCO JSON**: Writes `instances_train.json` and `instances_val.json` with RLE/polygon masks, modal/amodal bboxes, and 6-DoF pose extensions.
+   - **WebDataset / LeRobot**: Packages synchronized RGB, depth, segmentation, and camera intrinsics/extrinsics into sequential `.tar` shards for P.R.I.M.E. visuomotor policy pretraining.
+
+## 3. Core Mathematical Equations
+- **Blender-to-OpenCV Camera Extrinsics**:
+  $$\mathbf{T}_{C}^{W} = \begin{bmatrix} 1 & 0 & 0 & 0 \\ 0 & -1 & 0 & 0 \\ 0 & 0 & -1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix} \left(\mathbf{T}_{W}^{B}\right)^{-1}$$
+- **Pinhole Camera Projection**:
+  $$Z_C \begin{bmatrix} u \\ v \\ 1 \end{bmatrix} = \begin{bmatrix} f_x & 0 & c_x \\ 0 & f_y & c_y \\ 0 & 0 & 1 \end{bmatrix} [\mathbf{R} \mid \mathbf{t}] \begin{bmatrix} X_W \\ Y_W \\ Z_W \\ 1 \end{bmatrix}$$
+- **Latin Hypercube Stratum Coordinate**:
+  $$\hat{x}_{i, d} = \frac{\pi_d(i) - 1 + u_{i, d}}{N}, \quad u_{i, d} \sim \mathcal{U}(0, 1)$$
+- **Visibility & Occlusion Ratio**:
+  $$V_k = \frac{\sum_{r,c} \mathbb{I}(\mathbf{I}_{\text{inst}}[r,c] == k)}{\max(1, |\Omega_k^{\text{unocc, in-frame}}|)}, \quad O_k = 1 - V_k$$
+
+## 4. Key Data Contracts (`src/mirage/contracts.py`)
+- `CameraIntrinsics`: `width`, `height`, `fx`, `fy`, `cx`, `cy`, `near_clip_m`, `far_clip_m`, `matrix_3x3()`.
+- `Pose6DoF`: `object_id`, `class_id`, `class_name`, `translation_xyz_m` (tuple of 3 floats), `quaternion_wxyz` (unit quaternion in $\mathcal{F}_C$), `matrix_4x4()`.
+- `InstanceAnnotation`: `instance_id`, `class_id`, `class_name`, `bbox_2d_tight_xywh`, `bbox_2d_amodal_xywh`, `bbox_3d_corners_cam`, `visibility_ratio`, `occlusion_ratio`, `truncation_ratio`, `modal_pixel_area`, `pose_cam`.
+- `DomainRandomizationSpec`: `dataset_name`, `master_seed`, `num_scenes`, `views_per_scene`, `resolution_wh`, `render_backend`, `samples_per_pixel`, `max_vram_gb`, `camera_radius_range_m`, `camera_elevation_deg_range`, `hdri_exposure_range`, `pbr_roughness_range`, `pbr_metallic_range`, `min_visibility_ratio`, `max_truncation_ratio`.
+- `DatasetManifest`: `schema_version`, `dataset_name`, `created_utc`, `master_seed`, `spec_sha256`, `total_frames`, `rejected_frames`, `frames` (list of `FrameManifestEntry`), `dataset_merkle_sha256`.
+
+## 5. Verification & Benchmark Commands
+- Run unit tests: `pytest tests/ -v`
+- Run synthetic generation: `python scripts/generate_dataset.py --config configs/industrial_anomaly.yaml --num-scenes 50 --output-dir ./datasets/test_run`
+- Run hardware benchmark: `python scripts/benchmark_renderer.py --profiles eevee_fast_640,cycles_optix_640,cycles_optix_720p --num-frames 100`
+
+## 6. Physical AI Portfolio Suite
+1. **R.A.P.T.O.R.** (`https://github.com/madhavmadupu/raptor`) — Real-time Anomaly Perception & Tactical Operational Reconnaissance
+2. **S.O.N.A.R.** (`https://github.com/madhavmadupu/sonar`) — Simulated Optimization & Neural Actuation Runtime
+3. **A.E.G.I.S.** (`https://github.com/madhavmadupu/aegis`) — Autonomous Entity Guardrail & Intelligent Synchronization
+4. **P.R.I.M.E.** (`https://github.com/madhavmadupu/prime`) — Physical Reasoning & Intelligent Motor Execution
+5. **M.I.R.A.G.E.** (`https://github.com/madhavmadupu/mirage`) — Multimodal Intelligent Rendering & Automated Generation Engine

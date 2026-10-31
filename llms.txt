@@ -1,0 +1,22 @@
+# M.I.R.A.G.E. (Multimodal Intelligent Rendering & Automated Generation Engine)
+
+> Deterministic headless synthetic perception dataset generator built on Blender 4.2 LTS (`bpy`) and NVIDIA OptiX raytracing for single-GPU workstations (NVIDIA RTX 4060 8GB). Produces pixel-exact 2D/3D bounding boxes, 16-bit instance segmentation masks, Float32 metric depth maps, surface normals, and 6-DoF object poses in Ultralytics YOLO11, COCO JSON, and WebDataset/LeRobot formats.
+
+## Core Documentation
+- [README.md](README.md): System overview, 5-stage pipeline architecture, RTX 4060 8GB design budgets, CLI usage, and Physical AI portfolio integration.
+- [MASTER_SPEC.md](MASTER_SPEC.md): Mathematical formulations for SE(3) coordinate transforms, pinhole camera projection, modal/amodal occlusion ratios, Stratified Latin Hypercube Sampling (LHS), and SHA-256 dataset provenance hashing.
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): Headless `bpy` isolated worker pool architecture, OptiX BVH and VRAM lifecycle management on 8 GB GPUs, compositor node graph specification, and R.A.P.T.O.R. fine-tuning integration.
+- [docs/DATA_CONTRACTS.md](docs/DATA_CONTRACTS.md): Pydantic v2 schemas for `DomainRandomizationSpec`, `CameraIntrinsics`, `Pose6DoF`, `InstanceAnnotation`, `DatasetManifest`, and COCO/YOLO11 export formats.
+- [docs/BENCHMARK_METHODOLOGY.md](docs/BENCHMARK_METHODOLOGY.md): Methodology for profiling EEVEE Next vs. Cycles OptiX FPS, verifying 0-pixel 3D-to-2D projection drift, and measuring downstream mAP@50-95 gains on R.A.P.T.O.R. Tier 1 YOLO11.
+
+## Architecture Decision Records (ADRs)
+- [docs/ADR/0001-blender-bpy-optix-on-8gb-vram.md](docs/ADR/0001-blender-bpy-optix-on-8gb-vram.md): Selection of headless Blender `bpy` 4.2 LTS with OptiX over Isaac Sim / Unity Perception for 8 GB VRAM constraints.
+- [docs/ADR/0002-latin-hypercube-domain-randomization.md](docs/ADR/0002-latin-hypercube-domain-randomization.md): Stratified Latin Hypercube Sampling (LHS) for high-dimensional scene and PBR material randomization.
+- [docs/ADR/0003-raptor-yolo-export-pipeline.md](docs/ADR/0003-raptor-yolo-export-pipeline.md): Direct zero-copy multi-format export pipeline feeding R.A.P.T.O.R. YOLO11 and P.R.I.M.E. WebDataset shards.
+
+## Physical AI Suite Cross-Links
+- [R.A.P.T.O.R.](https://github.com/madhavmadupu/raptor): Real-time Anomaly Perception & Tactical Operational Reconnaissance (consumes M.I.R.A.G.E. YOLO11 datasets).
+- [S.O.N.A.R.](https://github.com/madhavmadupu/sonar): Simulated Optimization & Neural Actuation Runtime (shares collision mesh and camera frame conventions).
+- [A.E.G.I.S.](https://github.com/madhavmadupu/aegis): Autonomous Entity Guardrail & Intelligent Synchronization (uses synthetic depth streams for CBF-QP stress testing).
+- [P.R.I.M.E.](https://github.com/madhavmadupu/prime): Physical Reasoning & Intelligent Motor Execution (consumes M.I.R.A.G.E. WebDataset shards for VLA training).
+- [M.I.R.A.G.E.](https://github.com/madhavmadupu/mirage): Multimodal Intelligent Rendering & Automated Generation Engine.

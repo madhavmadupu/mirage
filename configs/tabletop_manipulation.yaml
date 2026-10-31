@@ -1,0 +1,38 @@
+dataset_name: "prime_tabletop_manipulation_v1"
+master_seed: 108476
+num_scenes: 200
+views_per_scene: 3
+resolution_wh: [640, 640]
+render_backend: "eevee_next"
+samples_per_pixel: 16
+max_vram_gb: 6.5
+train_split_ratio: 0.85
+
+camera_radius_range_m: [0.45, 0.95]
+camera_elevation_deg_range: [25.0, 70.0]
+camera_azimuth_deg_range: [0.0, 360.0]
+focal_length_mm_range: [32.0, 45.0]
+hdri_exposure_ev_range: [-1.0, 1.0]
+hdri_rotation_deg_range: [0.0, 360.0]
+pbr_metallic_range: [0.0, 0.80]
+pbr_roughness_range: [0.10, 0.90]
+distractor_count_range: [1, 6]
+
+min_visibility_ratio: 0.20
+max_truncation_ratio: 0.75
+min_modal_area_px: 24
+min_bbox_dim_px: 6.0
+
+categories:
+  - class_id: 0
+    class_name: "grasp_target_block"
+    primitive_type: "box"
+    dimensions_xyz_m: [0.06, 0.06, 0.06]
+  - class_id: 1
+    class_name: "alignment_peg_cylinder"
+    primitive_type: "cylinder"
+    dimensions_xyz_m: [0.04, 0.04, 0.12]
+  - class_id: 2
+    class_name: "fixture_receptacle"
+    primitive_type: "box"
+    dimensions_xyz_m: [0.14, 0.14, 0.05]

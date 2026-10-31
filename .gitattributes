@@ -1,0 +1,22 @@
+# Auto detect text files and perform LF normalization
+* text=auto eol=lf
+
+# Python and configuration sources
+*.py text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.cff text eol=lf
+*.txt text eol=lf
+
+# Binary assets and rendered buffers
+*.png binary
+*.exr binary
+*.hdr binary
+*.glb binary
+*.gltf binary
+*.usd binary
+*.usdc binary
+*.blend binary
+*.tar binary

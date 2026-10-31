@@ -1,0 +1,60 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "identifier": "mirage",
+  "name": "M.I.R.A.G.E.: Multimodal Intelligent Rendering & Automated Generation Engine",
+  "description": "Deterministic headless synthetic perception dataset generation engine built on Blender bpy and NVIDIA OptiX raytracing for single-GPU workstations (NVIDIA RTX 4060 8GB). Produces synchronized RGB, Float32 metric depth, surface normals, 16-bit instance masks, and 2D/3D bounding boxes with zero-pixel projection drift for R.A.P.T.O.R. and P.R.I.M.E.",
+  "version": "1.0.0",
+  "dateCreated": "2026-10-31",
+  "dateModified": "2026-10-31",
+  "license": "https://spdx.org/licenses/Apache-2.0.html",
+  "codeRepository": "https://github.com/madhavmadupu/mirage",
+  "issueTracker": "https://github.com/madhavmadupu/mirage/issues",
+  "programmingLanguage": [
+    "Python"
+  ],
+  "runtimePlatform": [
+    "Python 3.11+",
+    "Blender bpy 4.2 LTS",
+    "NVIDIA CUDA 12.x / OptiX 8.x"
+  ],
+  "operatingSystem": [
+    "Linux",
+    "Windows 11"
+  ],
+  "softwareRequirements": [
+    "numpy>=1.26.0",
+    "scipy>=1.12.0",
+    "pydantic>=2.7.0",
+    "pyyaml>=6.0.1",
+    "pillow>=10.3.0"
+  ],
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Madhav",
+      "familyName": "Madupu",
+      "email": "madhav.madupu@gmail.com",
+      "jobTitle": "Applied AI Engineer - Autonomous Systems & AI Infrastructure",
+      "url": "https://github.com/madhavmadupu"
+    }
+  ],
+  "keywords": [
+    "synthetic-data-generation",
+    "domain-randomization",
+    "latin-hypercube-sampling",
+    "blender-bpy",
+    "optix-raytracing",
+    "instance-segmentation",
+    "6dof-pose",
+    "yolo11",
+    "physical-ai"
+  ],
+  "isPartOf": [
+    "https://github.com/madhavmadupu/raptor",
+    "https://github.com/madhavmadupu/sonar",
+    "https://github.com/madhavmadupu/aegis",
+    "https://github.com/madhavmadupu/prime",
+    "https://github.com/madhavmadupu/mirage"
+  ]
+}

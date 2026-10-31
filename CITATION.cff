@@ -1,0 +1,60 @@
+cff-version: 1.2.0
+title: "M.I.R.A.G.E.: Multimodal Intelligent Rendering & Automated Generation Engine"
+message: "If you use M.I.R.A.G.E. or its synthetic perception datasets in your research or engineering systems, please cite this software using the metadata below."
+type: software
+authors:
+  - family-names: "Madupu"
+    given-names: "Madhav"
+    email: "madhav.madupu@gmail.com"
+    affiliation: "Applied AI Engineer - Autonomous Systems & AI Infrastructure"
+repository-code: "https://github.com/madhavmadupu/mirage"
+url: "https://github.com/madhavmadupu/mirage"
+abstract: >-
+  Deterministic headless synthetic perception dataset generation engine built on
+  Blender 4.2 LTS (bpy) and NVIDIA OptiX raytracing for single-GPU workstations
+  (NVIDIA RTX 4060 8GB). Implements stratified Latin Hypercube Sampling (LHS)
+  for domain randomization, rigid-body physics pose settling, single-pass
+  multi-modal ground-truth extraction (RGB, Float32 metric depth, surface
+  normals, 16-bit instance segmentation masks, 2D/3D bounding boxes, and 6-DoF
+  poses), cryptographic SHA-256 dataset provenance verification, and direct
+  export to Ultralytics YOLO11 (R.A.P.T.O.R.), COCO JSON, and WebDataset/LeRobot
+  (P.R.I.M.E.).
+keywords:
+  - synthetic-data
+  - computer-vision
+  - robotics-perception
+  - domain-randomization
+  - blender-bpy
+  - optix-raytracing
+  - 6dof-pose-estimation
+  - instance-segmentation
+  - yolo11
+  - physical-ai
+license: Apache-2.0
+version: 1.0.0
+date-released: "2026-10-31"
+references:
+  - type: software
+    title: "R.A.P.T.O.R.: Real-time Anomaly Perception & Tactical Operational Reconnaissance"
+    authors:
+      - family-names: "Madupu"
+        given-names: "Madhav"
+    repository-code: "https://github.com/madhavmadupu/raptor"
+  - type: software
+    title: "S.O.N.A.R.: Simulated Optimization & Neural Actuation Runtime"
+    authors:
+      - family-names: "Madupu"
+        given-names: "Madhav"
+    repository-code: "https://github.com/madhavmadupu/sonar"
+  - type: software
+    title: "A.E.G.I.S.: Autonomous Entity Guardrail & Intelligent Synchronization"
+    authors:
+      - family-names: "Madupu"
+        given-names: "Madhav"
+    repository-code: "https://github.com/madhavmadupu/aegis"
+  - type: software
+    title: "P.R.I.M.E.: Physical Reasoning & Intelligent Motor Execution"
+    authors:
+      - family-names: "Madupu"
+        given-names: "Madhav"
+    repository-code: "https://github.com/madhavmadupu/prime"
